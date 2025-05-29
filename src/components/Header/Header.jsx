@@ -40,6 +40,7 @@ function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   const toggleMenu = () => {
+    
     setIsMenuOpen(!isMenuOpen)
   }
 
@@ -67,7 +68,7 @@ function Header() {
       </div>
       {authStatus && (
          <div className="hidden lg:block">
-                <LogoutBtn />
+                <LogoutBtn>Logout</LogoutBtn>
                 </div>
             )}
       <div className="lg:hidden">

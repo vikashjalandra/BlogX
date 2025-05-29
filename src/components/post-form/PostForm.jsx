@@ -1,12 +1,34 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button, Input, Select, RTE } from '../index'
 import service from '../../appwrite/config'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import conf from '../../conf/Conf'
 
 
 function PostForm({ post }) {
+  const [title, setTitle] = useState('')
+  
+  const [aiContent,setAiContent] = useState('')
+  
+  const GenAI = new GoogleGenerativeAI(conf.geminiApiKey)
+  const model = GenAI.getGenerativeModel({
+    model:"gemini-1.5-flash"
+  })
+  
+  const generateContent =async()=>{
+    if(title){
+      const res = await model.generateContent(title)
+      const content = res.response.text()
+      console.log(res.response);
+      setAiContent(content)
+    } else if (!title) {
+      alert("Enter title to generate")
+    }
+  }
+
   const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
     defaultValues: {
       title: post?.title || '',
@@ -18,7 +40,6 @@ function PostForm({ post }) {
 
   const navigate = useNavigate()
   const userData = useSelector((state) =>{
-    console.log(state.auth.userData);
     return state.auth.userData
   })
 
@@ -91,6 +112,7 @@ function PostForm({ post }) {
         <Input
           label="Title :"
           placeholder="Title"
+         onInput={(e) => setTitle(e.target.value)}
           className="mb-4 border border-gray-700 rounded-none"
           {...register("title", { required: true })}
         />
@@ -103,7 +125,7 @@ function PostForm({ post }) {
             setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
           }}
         />
-        <RTE label="Content :" name="content" control={control} defaultValue={getValues("content")} />
+        <RTE label="Content :" name="content" initialValue={aiContent} control={control} defaultValue={getValues("content")} />
       </div>
       <div className="w-1/3 px-2">
         <Input
@@ -128,7 +150,10 @@ function PostForm({ post }) {
           className="mb-4 border border-gray-700 rounded-none"
           {...register("status", { required: true })}
         />
-        <Button type="submit" bgColor="bg-black" className="w-full hover:bg-gray-800 rounded-none">
+        <Button onClick={generateContent} bgColor="bg-black" className="w-full hover:bg-gray-800 rounded-none">
+          Generate Using AI
+        </Button>
+        <Button type="submit" bgColor="bg-black" className="w-full hover:bg-gray-800 rounded-none mt-2">
           {post ? "Update" : "Submit"}
         </Button>
       </div>

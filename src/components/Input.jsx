@@ -17,6 +17,7 @@ const Input = forwardRef(function Input({
             }
             <input 
             type={type}
+            onChange={(e) => console.log(e.target.value)}
             className={`px-3 py-2 rounded-none bg-white text-black outline-none focus:bg-gray-200 w-full border border-gray-400 ${className}`}
             ref={ref} {...prpos}
             id={id} />
